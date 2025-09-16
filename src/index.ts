@@ -26,6 +26,25 @@ async function run(): Promise<void> {
     }
 
     setOutput("number" ,pullNumber.toString());
+
+    // Intentar mergear automáticamente el PR
+    // Primero, obtener el estado mergeable
+    const prInfo = await octokit.pulls.get({
+      owner: inputs.owner,
+      repo: inputs.repo,
+      pull_number: pullNumber
+    });
+
+    if (prInfo.data.mergeable) {
+      await octokit.pulls.merge({
+        owner: inputs.owner,
+        repo: inputs.repo,
+        pull_number: pullNumber,
+        merge_method: "merge"
+      });
+    } else {
+      console.log("El PR no es mergeable automáticamente (puede tener conflictos o estar en estado inadecuado).");
+    }
   } catch (error) {
     setFailed(error.message);
   }
